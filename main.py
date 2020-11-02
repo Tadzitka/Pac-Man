@@ -47,6 +47,7 @@ class Pacman(Actor):
         self.x = x[0] + 2.0
 class Mapa():
     def __init__(self):
+        self.gracz = Pacman(1824, 928, "pac_1")
         self.plansza = []
         f = open("plansza").read()
         f = f.split()
@@ -74,35 +75,41 @@ class Mapa():
         else:
             right = False
         return(up,down,left,right)
+    def draw(self):
+        screen.clear()
+        for i in range(len(mapa.plansza)):
+            for j in range(len(mapa.plansza[i])):
+                if mapa.plansza[i][j] == "1":
+                    screen.blit("sciana", (j * 64, i * 64))
+                if mapa.plansza[i][j] == "0":
+                    screen.blit("moneta", ((j * 64) + 22, (i * 64) + 22))
+                if mapa.plansza[i][j] == "3":
+                    screen.blit("drzwi", (j * 64, i * 64))
+                if mapa.plansza[i][j] == "5":
+                    screen.blit("pac_2", (j * 64, i * 64))
+        self.gracz.draw()
+    def update(self):
+        self.gracz.update()
+        ruchy = self.kolizja(self.gracz.pos[0],self.gracz.pos[1])
+        if keyboard.up and ruchy[0] == True:
+            self.gracz.up()
+        if keyboard.down and ruchy[1] == True:
+            self.gracz.down()
+        if keyboard.right and ruchy[3] == True:
+            self.gracz.right()
+        if keyboard.left and ruchy[2] == True:
+            self.gracz.left()
+
 fps = 0
-gracz = Pacman(1824, 928, "pac_1")
+
 
 mapa = Mapa()
 
 def draw():
-    screen.clear()
-    for i in range(len(mapa.plansza)):
-        for j in range(len(mapa.plansza[i])):
-            if mapa.plansza [i][j] == "1":
-                screen.blit("sciana", (j * 64, i * 64))
-            if mapa.plansza [i][j] == "0":
-                screen.blit("moneta", ((j*64)+22, (i*64)+22))
-            if mapa.plansza [i][j] == "3":
-                screen.blit("drzwi", (j * 64, i * 64))
-            if mapa.plansza [i][j] == "5":
-                screen.blit("pac_2", (j * 64, i * 64))
-    gracz.draw()
+    mapa.draw()
 def update():
-    gracz.update()
-    print(mapa.kolizja(gracz.pos[0],gracz.pos[1]))
-    if keyboard.up:
-        gracz.up()
-    if keyboard.down:
-        gracz.down()
-    if keyboard.right:
-        gracz.right()
-    if keyboard.left:
-        gracz.left()
+    mapa.update()
+
 
 
 
