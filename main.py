@@ -11,6 +11,7 @@ class Pacman(Actor):
         self.czy_lustro = False
         self.fps = 0
         self.kat = 0
+        self.blok =False
     def draw(self):
         super(Pacman,self).draw()
     def update(self):
@@ -27,24 +28,37 @@ class Pacman(Actor):
             else:
                 self.image = "pac_1"
         self.angle = self.kat
+        d = self.pos [0]//32
+        e = self.pos [1]//32
+        print(d,e,self.pos)
+        if d * 32 == self.pos [0] and e * 32 == self.pos [1]:
+            self.blok = False
     def up(self):
-        self.czy_lustro = False
-        self.kat = 90
-        self.y -= 2
+        if self.blok == False:
+            self.czy_lustro = False
+            self.kat = 90
+            self.blok = True
+            animate(self,tween='linear',duration=0.7, pos=(self.pos[0], self.pos[1]-64))
     def down(self):
-        self.czy_lustro = False
-        self.kat = -90
-        self.y += 2
+        if self.blok == False:
+            self.czy_lustro = False
+            self.kat = -90
+            self.blok = True
+            animate(self,tween='linear',duration=0.7, pos=(self.pos[0], self.pos[1] + 64))
     def left(self):
-        self.czy_lustro = True
-        self.kat = 0
-        x = self.pos
-        self.x = x[0] - 2.0
+        if self.blok == False:
+            self.czy_lustro = True
+            self.kat = 0
+            x = self.pos
+            self.blok = True
+            animate(self,tween='linear',duration=0.7, pos=(self.pos[0] - 64, self.pos[1]))
     def right(self):
-        self.czy_lustro = False
-        self.kat = 0
-        x = self.pos
-        self.x = x[0] + 2.0
+        if self.blok == False:
+            self.czy_lustro = False
+            self.kat = 0
+            x = self.pos
+            self.blok = True
+            animate(self,tween='linear',duration=0.7, pos=(self.pos[0] + 64, self.pos[1]))
 class Mapa():
     def __init__(self):
         self.gracz = Pacman(1824, 928, "pac_1")
