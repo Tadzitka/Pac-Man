@@ -63,6 +63,7 @@ class Mapa():
     def __init__(self):
         self.gracz = Pacman(1824, 928, "pac_1")
         self.plansza = []
+        self.licznik = 0
         f = open("plansza").read()
         f = f.split()
         for i in f:
@@ -71,24 +72,30 @@ class Mapa():
         """zwraca krotkę (up,down,left,right)"""
         x=int(x//64)
         y=int(y//64)
-        print(x,y)
-        if y - 1 >= 0 and self.plansza [y-1][x] == "0":
+        if y - 1 >= 0 and (self.plansza [y-1][x] == "0" or self.plansza [y-1][x] == "9"):
             up = True
         else:
             up = False
-        if y + 1 <= (len(self.plansza)) and self.plansza [y+1][x] == "0":
+        if y + 1 <= (len(self.plansza)) and (self.plansza[y + 1][x] == "0" or self.plansza[y + 1][x] == "9"):
             down = True
         else:
             down = False
-        if x - 1 >= 0 and self.plansza [y][x-1] == "0":
+        if x - 1 >= 0 and (self.plansza [y][x-1] == "0" or self.plansza [y][x-1] == "9"):
             left = True
         else:
             left = False
-        if x + 1 <= (len(self.plansza[y])) and self.plansza[y][x+1] == "0":
+        if x + 1 <= (len(self.plansza[y])) and (self.plansza[y][x+1] == "0" or self.plansza[y][x+1] == "9"):
             right = True
         else:
             right = False
         return(up,down,left,right)
+    def jedzenie(self, x, y):
+        x = int(x // 64)
+        y = int(y // 64)
+        print(x, y)
+        if self.plansza[y][x] == "0":
+            self.licznik += 10
+            self.plansza[y][x] = "9"
     def draw(self):
         screen.clear()
         for i in range(len(mapa.plansza)):
@@ -102,8 +109,10 @@ class Mapa():
                 if mapa.plansza[i][j] == "5":
                     screen.blit("pac_2", (j * 64, i * 64))
         self.gracz.draw()
+        screen.draw.text(str(self.licznik), (30, 20), color="red", fontsize=60)
     def update(self):
         self.gracz.update()
+        self.jedzenie(self.gracz.pos[0],self.gracz.pos[1])
         ruchy = self.kolizja(self.gracz.pos[0],self.gracz.pos[1])
         if keyboard.up and ruchy[0] == True:
             self.gracz.up()
@@ -113,6 +122,7 @@ class Mapa():
             self.gracz.right()
         if keyboard.left and ruchy[2] == True:
             self.gracz.left()
+        print("licznik:", self.licznik)
 
 fps = 0
 
