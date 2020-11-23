@@ -1,4 +1,5 @@
 import pgzrun
+import random
 
 WIDTH = 1920
 HEIGHT = 1024
@@ -135,25 +136,26 @@ class Mapa():
         f = f.split()
         for i in f:
             self.plansza.append(list(i))
-        self.duszki = Duszek(928, 480, "duch1a", 1)
+        self.duszki = [Duszek(928, 480, "duch1a", 1), Duszek(1056, 480, "duch2a", 2), Duszek(1184, 480, "duch3a", 3), Duszek(1312, 480, "duch4a", 4)]
+        self.ilosc_rochow = 0
 
     def kolizja(self, x, y):
         """zwraca krotkę (up,down,left,right)"""
         x = int(x // 64)
         y = int(y // 64)
-        if y - 1 >= 0 and (self.plansza[y - 1][x] == "0" or self.plansza[y - 1][x] == "9"):
+        if y - 1 >= 0 and (self.plansza[y - 1][x] == "0" or self.plansza[y - 1][x] == "9" or self.plansza[y - 1][x] == "3"):
             up = True
         else:
             up = False
-        if y + 1 <= (len(self.plansza)) and (self.plansza[y + 1][x] == "0" or self.plansza[y + 1][x] == "9"):
+        if y + 1 <= (len(self.plansza)) and (self.plansza[y + 1][x] == "0" or self.plansza[y + 1][x] == "9" or self.plansza[y + 1][x] == "3"):
             down = True
         else:
             down = False
-        if x - 1 >= 0 and (self.plansza[y][x - 1] == "0" or self.plansza[y][x - 1] == "9"):
+        if x - 1 >= 0 and (self.plansza[y][x - 1] == "0" or self.plansza[y][x - 1] == "9" or self.plansza[y][x - 1] == "3"):
             left = True
         else:
             left = False
-        if x + 1 <= (len(self.plansza[y])) and (self.plansza[y][x + 1] == "0" or self.plansza[y][x + 1] == "9"):
+        if x + 1 <= (len(self.plansza[y])) and (self.plansza[y][x + 1] == "0" or self.plansza[y][x + 1] == "9" or self.plansza[y][x + 1] == "3"):
             right = True
         else:
             right = False
@@ -166,7 +168,22 @@ class Mapa():
         if self.plansza[y][x] == "0":
             self.licznik += 10
             self.plansza[y][x] = "9"
-
+    def ai_duchow(self):
+        for i in range (4):
+            # 0 - up, 1 - down, 2 - left, 3 - right
+            ruch = self.kolizja(self.duszki[i].pos[0], self.duszki[i].pos[1])
+            losowa = random.randint(0, 3)
+            while(ruch[losowa] != True):
+                losowa = random.randint(0, 3)
+            if losowa == 0:
+                self.duszki[i].up()
+            elif losowa == 1:
+                self.duszki[i].down()
+            elif losowa == 2:
+                self.duszki[i].left()
+            elif losowa == 3:
+                self.duszki[i].right()
+            print(ruch)
     def draw(self):
         screen.clear()
         for i in range(len(mapa.plansza)):
@@ -179,29 +196,30 @@ class Mapa():
                     screen.blit("drzwi", (j * 64, i * 64))
                 if mapa.plansza[i][j] == "5":
                     screen.blit("pac_2", (j * 64, i * 64))
-        self.duszki.draw()
+        for i in range (4):
+            self.duszki[i].draw()
         self.gracz.draw()
         screen.draw.text(str(self.licznik), (30, 20), color="red", fontsize=60)
 
     def update(self):
         self.gracz.update()
-        self.duszki.update()
+        for i in range(4):
+            self.duszki[i].update()
+        self.ai_duchow()
         self.jedzenie(self.gracz.pos[0], self.gracz.pos[1])
         ruchy = self.kolizja(self.gracz.pos[0], self.gracz.pos[1])
         if keyboard.up and ruchy[0] == True:
             self.gracz.up()
-            self.duszki.up()
+            #self.duszki.up()
         if keyboard.down and ruchy[1] == True:
             self.gracz.down()
-            self.duszki.down()
+            #self.duszki.down()
         if keyboard.right and ruchy[3] == True:
             self.gracz.right()
-            self.duszki.right()
+            #self.duszki.right()
         if keyboard.left and ruchy[2] == True:
             self.gracz.left()
-            self.duszki.left()
-        if keyboard.e:
-            self.duszki.right()
+            #self.duszki.left()
         # print("licznik:", self.licznik)
 
 
