@@ -15,7 +15,12 @@ class Pacman(Actor):
         self.fps = 0
         self.kat = 0
         self.blok = False
-
+    def reset(self, x, y):
+        self.pos = x, y
+        self.czy_lustro = False
+        self.fps = 0
+        self.kat = 0
+        self.blok = False
     def draw(self):
         super(Pacman, self).draw()
 
@@ -68,8 +73,29 @@ class Pacman(Actor):
             x = self.pos
             self.blok = True
             animate(self, tween='linear', duration=0.7, pos=(self.pos[0] + 64, self.pos[1]))
-
-
+class Zycie():
+    def __init__(self, x, y):
+        self.ilosc = 3
+        self.zycia = []
+        self.blokada = False
+        for i in range(3):
+            self.zycia.append(Actor("pac_1",( x+i*64, y)))
+    def zdejmij_blok(self):
+        self.blokada = False
+    def draw(self):
+        for i in self.zycia:
+            i.draw()
+    def zmniejsz(self):
+        if self.blokada == False:
+            self.ilosc -= 1
+            if self.ilosc < 0:
+                self.ilosc = 0
+            nowa = []
+            for i in range(self.ilosc):
+                nowa.append(self.zycia [i])
+            self.zycia = nowa
+            self.blokada = True
+            clock.schedule_unique(self.zdejmij_blok, 2)
 class Duszek(Actor):
     def __init__(self, x, y, kos, numer):
         super(Duszek, self).__init__(kos, (x, y))
@@ -138,6 +164,7 @@ class Mapa():
             self.plansza.append(list(i))
         self.duszki = [Duszek(928, 480, "duch1a", 1), Duszek(1056, 480, "duch2a", 2), Duszek(1184, 480, "duch3a", 3), Duszek(1312, 480, "duch4a", 4)]
         self.ilosc_rochow = 0
+        self.zycia = Zycie(224, 32)
 
     def kolizja(self, x, y):
         """zwraca krotkę (up,down,left,right)"""
@@ -164,7 +191,6 @@ class Mapa():
     def jedzenie(self, x, y):
         x = int(x // 64)
         y = int(y // 64)
-        # print(x, y)
         if self.plansza[y][x] == "0":
             self.licznik += 10
             self.plansza[y][x] = "9"
@@ -200,7 +226,7 @@ class Mapa():
             self.duszki[i].draw()
         self.gracz.draw()
         screen.draw.text(str(self.licznik), (30, 20), color="red", fontsize=60)
-
+        self.zycia.draw()
     def update(self):
         self.gracz.update()
         for i in range(4):
@@ -208,20 +234,20 @@ class Mapa():
         self.ai_duchow()
         self.jedzenie(self.gracz.pos[0], self.gracz.pos[1])
         ruchy = self.kolizja(self.gracz.pos[0], self.gracz.pos[1])
+        for i in range (len(self.duszki)):
+            if self.duszki[i].collidepoint(self.gracz.pos):
+                self.gracz.reset(1824, 928)
+                self.zycia.zmniejsz()
+                ruchy = [False, False, False, False]
+                break
         if keyboard.up and ruchy[0] == True:
             self.gracz.up()
-            #self.duszki.up()
         if keyboard.down and ruchy[1] == True:
             self.gracz.down()
-            #self.duszki.down()
         if keyboard.right and ruchy[3] == True:
             self.gracz.right()
-            #self.duszki.right()
         if keyboard.left and ruchy[2] == True:
             self.gracz.left()
-            #self.duszki.left()
-        # print("licznik:", self.licznik)
-
 
 fps = 0
 
